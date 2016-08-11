@@ -115,9 +115,7 @@ private static final Logger LOG = LoggerFactory.getLogger(DatabaseManager.class)
 			prepareStatement.setDouble(7, data.getBatteryVol());
 			prepareStatement.setInt(8, data.getWirelessSig());
 			int result = prepareStatement.executeUpdate();
-			if (result == 1) {
-				LOG.info("常规数据保存成功！");
-			} else {
+			if (result != 1) {
 				LOG.info("常规数据保存失败！");
 			}
 		} catch (SQLException e) {
@@ -677,7 +675,7 @@ private static final Logger LOG = LoggerFactory.getLogger(DatabaseManager.class)
 			prepareStatement = conn.prepareStatement(sql);			
 			rs = prepareStatement.executeQuery();
 			if (rs.next()) {
-				SystemConfig.initial(rs.getString(2), rs.getString(3), rs.getDouble(4), rs.getString(5), rs.getString(6));
+				SystemConfig.initial(rs.getString(2), rs.getString(3), rs.getDouble(4), rs.getString(5), rs.getString(6), rs.getBoolean(11));
 			}
 		} catch (SQLException e) {
 			LOG.error(e.toString());

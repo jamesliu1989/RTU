@@ -120,12 +120,15 @@ public class DataCommunicator {
 											System.err.println("************************"+nodeNo+"**************************");
 											if(data[i] == ERROR_BYTE && data[i + 1] == ERROR_BYTE){
 												System.out.println("温度传感器A出错！");
+												LOG.error("温度传感器A出错！");
 											}
 											if(data[i + 2] == ERROR_BYTE && data[i + 3] == ERROR_BYTE){
 												System.out.println("温度传感器B出错！");
+												LOG.error("温度传感器B出错！");
 											}
 											if(data[i + 7] == ERROR_BYTE){
 												System.out.println("湿度传感器出错！");
+												LOG.error("湿度传感器出错！");
 											}
 											System.out.println("温度A："+ DataParser.hex2Double(data[i],data[i + 1]));
 											System.out.println("温度B："+ DataParser.hex2Double(data[i + 2],data[i + 3]));
@@ -145,7 +148,9 @@ public class DataCommunicator {
 											nodeDailyReport(nodeNo);
 											
 											//发送短信报警
-											//sendAlertSms();
+											if(config.getSmsAlert()){
+											  sendAlertSms();
+											}
 									}
 								}
 							} else {

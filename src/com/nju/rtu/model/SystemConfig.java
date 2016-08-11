@@ -22,6 +22,11 @@ public class SystemConfig implements java.io.Serializable {
 	private static Double collectCycle;
 	private static String smsComPort;
 	private static String smsBaudRate;
+	private static Boolean showTempMed;
+	private static Boolean showTempEnv;
+	private static Boolean showHumidity;
+	private static Boolean showSmogAlert;
+	private static Boolean smsAlert;
 	
 	private static SystemConfig config = null;
 
@@ -50,12 +55,13 @@ public class SystemConfig implements java.io.Serializable {
 
 	/** initial */
 	public static void initial(String comPort, String baudRate, Double collectCycle, 
-			String smsComPort, String smsBaudRate) {
+			String smsComPort, String smsBaudRate, Boolean smsAlert) {
 		SystemConfig.comPort = comPort;
 	    SystemConfig.baudRate = baudRate;
 		SystemConfig.collectCycle = collectCycle;
 		SystemConfig.smsComPort = smsComPort;
 		SystemConfig.smsBaudRate = smsBaudRate;
+		SystemConfig.smsAlert = smsAlert;
 	}
 
 	//·µ»Øconfigµ¥Àý
@@ -112,6 +118,46 @@ public class SystemConfig implements java.io.Serializable {
 
 	public void setSmsBaudRate(String smsBaudRate) {
 		this.smsBaudRate = smsBaudRate;
+	}
+
+	public Boolean getShowTempMed() {
+		return showTempMed;
+	}
+
+	public void setShowTempMed(Boolean showTempMed) {
+		this.showTempMed = showTempMed;
+	}
+
+	public Boolean getShowTempEnv() {
+		return showTempEnv;
+	}
+
+	public void setShowTempEnv(Boolean showTempEnv) {
+		this.showTempEnv = showTempEnv;
+	}
+
+	public Boolean getShowHumidity() {
+		return showHumidity;
+	}
+
+	public void setShowHumidity(Boolean showHumidity) {
+		this.showHumidity = showHumidity;
+	}
+
+	public Boolean getShowSmogAlert() {
+		return showSmogAlert;
+	}
+
+	public void setShowSmogAlert(Boolean showSmogAlert) {
+		this.showSmogAlert = showSmogAlert;
+	}
+
+	public Boolean getSmsAlert() {
+		return smsAlert;
+	}
+
+	public void setSmsAlert(Boolean smsAlert) {
+		this.smsAlert = smsAlert;
 	}
 	
 	
