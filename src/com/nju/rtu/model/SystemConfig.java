@@ -36,10 +36,11 @@ public class SystemConfig implements java.io.Serializable {
 	private SystemConfig() {
 		// 1. Setup the parameters
         String dbHost = Config.getValue("dbHost");
+        String dbPort = Config.getValue("dbPort");
         String dbUser = Config.getValue("dbUser");
         String dbPwd  = Config.getValue("dbPwd");
         try {
-			DatabaseManager.connectDB("jdbc:mysql://"+ dbHost +":3306/monitor", dbUser, dbPwd);
+			DatabaseManager.connectDB("jdbc:mysql://"+ dbHost +":"+ dbPort +"/monitor", dbUser, dbPwd);
 			DatabaseManager.getSystemConfig();
 		} catch (Exception e) {
 			e.printStackTrace();

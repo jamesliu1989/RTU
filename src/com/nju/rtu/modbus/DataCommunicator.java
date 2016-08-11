@@ -65,11 +65,9 @@ public class DataCommunicator {
 		
 		// 1. Setup the parameters
         String dbHost = Config.getValue("dbHost");
+        String dbPort = Config.getValue("dbPort");
         String dbUser = Config.getValue("dbUser");
         String dbPwd  = Config.getValue("dbPwd");
-        /* DatabaseManager.connectDB("jdbc:mysql://"+ dbHost +":3306/monitor", dbUser, dbPwd);
-		config = DatabaseManager.getSystemConfig();
-		DatabaseManager.disconnectDB();*/
 			
 		try {
 			// 2. Setup serial parameters
@@ -87,7 +85,7 @@ public class DataCommunicator {
 			msm.connect();
 
 			while (true){
-				DatabaseManager.connectDB("jdbc:mysql://"+ dbHost +":3306/monitor", dbUser, dbPwd);
+				DatabaseManager.connectDB("jdbc:mysql://"+ dbHost +":"+ dbPort +"/monitor", dbUser, dbPwd);
 				byte[] data = null;
 				//获取所有控制器信息
 				List<Controler> ctrlers = DatabaseManager.getControlerInfo();
@@ -119,24 +117,20 @@ public class DataCommunicator {
 													DataParser.hex2IntLow(data[i + 4]));               //无线信号强度
 											System.err.println("************************"+nodeNo+"**************************");
 											if(data[i] == ERROR_BYTE && data[i + 1] == ERROR_BYTE){
-												System.out.println("温度传感器A出错！");
 												LOG.error("温度传感器A出错！");
 											}
 											if(data[i + 2] == ERROR_BYTE && data[i + 3] == ERROR_BYTE){
-												System.out.println("温度传感器B出错！");
 												LOG.error("温度传感器B出错！");
 											}
 											if(data[i + 7] == ERROR_BYTE){
-												System.out.println("湿度传感器出错！");
 												LOG.error("湿度传感器出错！");
 											}
-											System.out.println("温度A："+ DataParser.hex2Double(data[i],data[i + 1]));
-											System.out.println("温度B："+ DataParser.hex2Double(data[i + 2],data[i + 3]));
-											System.out.println("湿度："+ DataParser.hex2Double(data[i + 7]) * 10);
-											System.out.println("烟雾报警："+ DataParser.hex2IntHigh(data[i + 4]));
-											System.out.println("无线信号轻度："+ DataParser.hex2IntLow(data[i + 4]));
-											System.out.println("电池电压："+ DataParser.hex2Double(data[i + 5]));
-											System.err.println("********************************************************");
+											LOG.info("温度A："+ DataParser.hex2Double(data[i],data[i + 1]));
+											LOG.info("温度B："+ DataParser.hex2Double(data[i + 2],data[i + 3]));
+											LOG.info("湿度："+ DataParser.hex2Double(data[i + 7]) * 10);
+											LOG.info("烟雾报警："+ DataParser.hex2IntHigh(data[i + 4]));
+											LOG.info("无线信号轻度："+ DataParser.hex2IntLow(data[i + 4]));
+											LOG.info("电池电压："+ DataParser.hex2Double(data[i + 5]));
 											
 											// 预报警、报警计算
 											processAlert(regularData);
