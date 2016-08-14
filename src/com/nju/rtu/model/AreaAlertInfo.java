@@ -9,7 +9,8 @@ public class AreaAlertInfo implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = -4239363223729760357L;
 	
-	public static String TEMP_NULL = "温度采集异常";                 //TYPE1
+	public static String TEMP_MED_NULL = "介质温度采集异常";           //TYPE1
+	public static String TEMP_ENV_NULL = "环境温度采集异常";           //TYPE1
 	public static String TEMP_MED_MAX = "介质温度超上限";             //TYPE2
 	public static String TEMP_MED_RATE = "介质温升速率超上限";         //TYPE3
 	public static String TEMP_MED_DEV_ABS = "介质温度极均差值超上限";   //TYPE4

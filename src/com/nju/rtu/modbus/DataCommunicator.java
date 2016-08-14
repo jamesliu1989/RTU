@@ -94,14 +94,14 @@ public class DataCommunicator {
 					int nodeNum = ctrl.getNodeNum();
 					try {
 						//分批采集
-                        //int toFetchModes = nodeNum;						
-						//int fetchNodesNextCycle = Math.min(toFetchModes, MAX_NODE_PER_CYCLE);
-						//for(int fetched=0; toFetchModes > 0; fetched += fetchNodesNextCycle, toFetchModes -=fetchNodesNextCycle){
-						    //fetchNodesNextCycle = Math.min(toFetchModes, MAX_NODE_PER_CYCLE);
-						    //data = msm.readMultipleRegisters(slaveId, 2 * REGISTER_NUM_PER_RECORD * fetched, REGISTER_NUM_PER_RECORD * fetchNodesNextCycle);
+/*                        int toFetchModes = nodeNum;						
+						int fetchNodesNextCycle = Math.min(toFetchModes, MAX_NODE_PER_CYCLE);
+						for(int fetched=0; toFetchModes > 0; fetched += fetchNodesNextCycle, toFetchModes -=fetchNodesNextCycle){
+						    fetchNodesNextCycle = Math.min(toFetchModes, MAX_NODE_PER_CYCLE);
+						    data = msm.readMultipleRegisters(slaveId, 2 * REGISTER_NUM_PER_RECORD * fetched, REGISTER_NUM_PER_RECORD * fetchNodesNextCycle);*/
 						    data = msm.readMultipleRegisters(slaveId, 0, REGISTER_NUM_PER_RECORD * 12);
 							if (data != null) {
-								System.out.println("数据采集成功！");
+								LOG.info("数据采集成功！");
 								for(int i = 0, j = 0; i < data.length; i += RECORD_BYTES, j++){
 									String nodeNo = "C"+slaveId+"-"+j;
 									NodeInfo node = DatabaseManager.getNode(nodeNo);
@@ -150,7 +150,9 @@ public class DataCommunicator {
 							} else {
 								LOG.error("控制器:"+slaveId+"数据采集失败！");
 							}
-						//}
+/*							//多借点连续采集间隔时间
+							Thread.sleep(5 * 1000);
+						}*/
 					} catch (Exception e) {
 						e.printStackTrace();
 						LOG.error("控制器:"+slaveId+"数据采集失败！");
@@ -519,11 +521,11 @@ public class DataCommunicator {
 		if(aap == null || aap.size()!=2){
 			return;
 		}
-		
+		if(config.getShowTempMed()){ 
 		//温度采集异常  TYPE1
-		if(data.getTempMed() == ERROR_TMP || data.getTempEnv() == ERROR_TMP){
+		if(data.getTempMed() == ERROR_TMP){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
-					AreaAlertInfo.TEMP_NULL, 999.0, "℃", "", "TYPE1"));
+					AreaAlertInfo.TEMP_MED_NULL, 999.0, "℃", "", "TYPE1"));
 			DatabaseManager.updateAreaAlert(areaNo, 1);
 			//添加短信报警
 			if(success && smsAlertInfo.type.getType1().equals("1")){
@@ -536,7 +538,28 @@ public class DataCommunicator {
 			}
 			return;
 		}
+		}
 		
+		if(config.getShowTempEnv()){ 
+		//温度采集异常  TYPE1
+		if(data.getTempEnv() == ERROR_TMP){
+			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
+					AreaAlertInfo.TEMP_ENV_NULL, 999.0, "℃", "", "TYPE1"));
+			DatabaseManager.updateAreaAlert(areaNo, 1);
+			//添加短信报警
+			if(success && smsAlertInfo.type.getType1().equals("1")){
+				String smsContent = smsTemplate						
+						.replace("#报警级别#", "报警")
+						.replace("#报警类别#", smsAlertInfo.content.getType1())
+						.replace("#当前值#", "")
+						.replace("#设定值#", "");		
+				smsContentList.add(smsContent);
+			}
+			return;
+		}
+		}
+		
+        if(config.getShowHumidity()){
 		//湿度采集异常  TYPE13
 		if(data.getHumidity() == ERROR_HU){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -553,7 +576,8 @@ public class DataCommunicator {
 			}
 			return;
 		}
-		
+        }
+        if(config.getShowTempMed()){
 		//介质温度上限报警 TYPE2			
 		if(data.getTempMed() > aap.get(1).getTempMedMax()){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -583,7 +607,9 @@ public class DataCommunicator {
 				smsContentList.add(smsContent);
 			}			
 		}
-		
+        }
+        
+        if(config.getShowTempEnv()){
 		//环境温度上限报警 TYPE5
 		if(data.getTempEnv() > aap.get(1).getTempEnvMax()){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -612,7 +638,9 @@ public class DataCommunicator {
 				smsContentList.add(smsContent);
 			}
 		}
+        }
 		
+        if(config.getShowHumidity()){
 		//湿度上限报警 TYPE10
 		if(data.getHumidity() > aap.get(1).getHumidityMax()){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -641,6 +669,7 @@ public class DataCommunicator {
 				smsContentList.add(smsContent);
 			}
 		}
+        }
 		
 		RegularData latestData = DatabaseManager.findLatestByNodeNo(nodeNO);
 		
@@ -650,6 +679,7 @@ public class DataCommunicator {
 		}
 		double deltaMedRate = Double.parseDouble(df.format((data.getTempMed() - latestData.getTempMed())/config.getCollectCycle()));
 		double deltaEnvRate = Double.parseDouble(df.format((data.getTempEnv() - latestData.getTempEnv())/config.getCollectCycle()));
+		if(config.getShowTempMed()){
 		//介质温温升上限报警 TYPE3
 		if(deltaMedRate > aap.get(1).getTempMedRate()){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -678,8 +708,9 @@ public class DataCommunicator {
 				smsContentList.add(smsContent);
 			}
 		}
-		
-				
+		}
+			
+		if(config.getShowTempEnv()){
 		//环境温升上限报警 TYPE6
 		if(deltaEnvRate > aap.get(1).getTempEnvRate()){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -708,8 +739,9 @@ public class DataCommunicator {
 				smsContentList.add(smsContent);
 			}
 		}
+		}
 		
-		
+		if(config.getShowTempMed() && config.getShowTempEnv()){
 		//单支温差上限报警 TYPE8
 		double deltaTemp = Double.parseDouble(df.format(Math.abs(data.getTempMed() - data.getTempEnv())));
 		if(deltaTemp > aap.get(1).getTempDevAbs()){
@@ -738,6 +770,7 @@ public class DataCommunicator {
 						.replace("#设定值#", aap.get(0).getTempDevAbs()+"℃");		
 				smsContentList.add(smsContent);
 			}
+		}
 		}
 		
 		
@@ -819,7 +852,8 @@ public class DataCommunicator {
 		double tempMedDevAbs = Double.parseDouble(df.format(Math.abs(data.getTempMed() - ((count != 0) ?  areaTempMedSum/count : 0))));
 		double tempEnvDevAbs = Double.parseDouble(df.format(Math.abs(data.getTempEnv() - ((count != 0) ?  areaTempEnvSum/count : 0))));
 		double tempAvgDevAbs = Double.parseDouble(df.format(Math.abs(Math.abs(data.getTempMed() - data.getTempEnv()) - ((count != 0) ?  areaTempDevSum/count : 0))));
-					
+			
+		if(config.getShowTempMed()){
 		//介质温度极均差值上限报警  type4
 		if(tempMedDevAbs > aap.get(1).getTempMedDevAbs()){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -848,7 +882,9 @@ public class DataCommunicator {
 				smsContentList.add(smsContent);
 			}
 		}
+		}
 		
+		if(config.getShowTempEnv()){
 		//环境温度极均差值上限报警  type7
 		if(tempEnvDevAbs > aap.get(1).getTempEnvDevAbs()){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -877,7 +913,9 @@ public class DataCommunicator {
 				smsContentList.add(smsContent);
 			}
 		}
+		}
 		
+		if(config.getShowTempMed() && config.getShowTempEnv()){
 		//温度差均差上限报警 type9
 		if(tempAvgDevAbs > aap.get(1).getTempAvgDevAbs()){
 			boolean success = DatabaseManager.insertAlert(new AreaAlertInfo(areaNo, nodeNO, AreaAlertInfo.ALERT_PROPERTY_2,
@@ -905,6 +943,7 @@ public class DataCommunicator {
 						.replace("#设定值#", aap.get(0).getTempAvgDevAbs()+"");		
 				smsContentList.add(smsContent);
 			}
+		}
 		}
 		
 		if(alert ==1 ){

@@ -56,12 +56,16 @@ public class SystemConfig implements java.io.Serializable {
 
 	/** initial */
 	public static void initial(String comPort, String baudRate, Double collectCycle, 
-			String smsComPort, String smsBaudRate, Boolean smsAlert) {
+			String smsComPort, String smsBaudRate, Boolean showTempMed, Boolean showTempEnv, Boolean showHumidity, Boolean showSmogAlert, Boolean smsAlert) {
 		SystemConfig.comPort = comPort;
 	    SystemConfig.baudRate = baudRate;
 		SystemConfig.collectCycle = collectCycle;
 		SystemConfig.smsComPort = smsComPort;
 		SystemConfig.smsBaudRate = smsBaudRate;
+		SystemConfig.showTempMed = showTempMed;
+		SystemConfig.showTempEnv = showTempEnv;
+		SystemConfig.showHumidity = showHumidity;
+		SystemConfig.showSmogAlert = showSmogAlert;
 		SystemConfig.smsAlert = smsAlert;
 	}
 

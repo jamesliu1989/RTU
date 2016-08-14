@@ -675,7 +675,8 @@ private static final Logger LOG = LoggerFactory.getLogger(DatabaseManager.class)
 			prepareStatement = conn.prepareStatement(sql);			
 			rs = prepareStatement.executeQuery();
 			if (rs.next()) {
-				SystemConfig.initial(rs.getString(2), rs.getString(3), rs.getDouble(4), rs.getString(5), rs.getString(6), rs.getBoolean(11));
+				SystemConfig.initial(rs.getString(2), rs.getString(3), rs.getDouble(4), rs.getString(5), rs.getString(6), 
+						rs.getBoolean(7), rs.getBoolean(8), rs.getBoolean(9), rs.getBoolean(10), rs.getBoolean(11));
 			}
 		} catch (SQLException e) {
 			LOG.error(e.toString());
